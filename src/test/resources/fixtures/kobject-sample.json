@@ -1,0 +1,27 @@
+{
+  "@context": "http://lhs.umich.edu/kgrid/library",
+  "@type": "KnowledgeObject",
+  "name": "Demonstration Knowledge Object Serialization",
+  "url": "ark/blahblahblah",
+  "inputMessage": {
+    "@type": "inputMessage",
+    "nooparams": 1,
+    "hasParameter": {
+      "name": "foo",
+      "dataType": "STRING"
+    }
+  },
+  "outputMessage":
+  {
+    "@type": "outputMessage",
+    "returnType": "STRING"
+  },
+  "payload": {
+    "content": "function hello():\n    print(\"Hello, World\")",
+    "functionName:": "hello()",
+    "engineType": "Python"
+
+  }
+}
+
+
