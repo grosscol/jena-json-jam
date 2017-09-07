@@ -3,7 +3,6 @@ package edu.umich.lhs;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.security.MessageDigest;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.riot.RDFDataMgr;
@@ -29,35 +28,60 @@ public class KobjectImporterTest {
   }
 
   @Test
-  public void smoke() throws Exception {
+  public void modelFromXML() throws Exception {
     InputStream stream = TestUtils.streamFixture("kobject-sample.xml");
-    Model model = KobjectImporter.streamToModel(stream);
+    Model model = KobjectImporter.xmlToModel(stream);
 
-    model.write(System.out);
-    //RDFDataMgr.write(System.out, model, RDFFormat.JSONLD_PRETTY);
+    System.out.print(KobjectImporter.summarize(model));
   }
 
   @Test
-  public void jsonOutput() throws Exception {
-    InputStream stream = TestUtils.streamFixture("kobject-sample.xml");
-    Model model = KobjectImporter.streamToModel(stream);
+  public void modelFromJSON() throws Exception {
+    InputStream stream = TestUtils.streamFixture("kobject-sample.json");
+    Model model = KobjectImporter.jsonToModel(stream);
 
-    RDFDataMgr.write(System.out, model, RDFFormat.JSONLD_PRETTY);
+    System.out.print(KobjectImporter.summarize(model));
   }
 
   @Test
   public void stringSummary() throws Exception {
     InputStream stream = TestUtils.streamFixture("kobject-sample.xml");
-    Model model = KobjectImporter.streamToModel(stream);
+    Model model = KobjectImporter.xmlToModel(stream);
 
     String s = KobjectImporter.summarize(model);
     System.out.println(s);
   }
 
   @Test
+  public void exquivalence() throws Exception{
+    InputStream stream;
+
+    stream = TestUtils.streamFixture("kobject-sample.xml");
+    Model xModel = KobjectImporter.xmlToModel(stream);
+    stream.close();
+
+    stream = TestUtils.streamFixture("kobject-sample.json");
+    Model jModel = KobjectImporter.jsonToModel(stream);
+    stream.close();
+
+    MessageDigest xDig = MessageDigest.getInstance("MD5");
+    MessageDigest jDig = MessageDigest.getInstance("MD5");
+
+    String xSummary = KobjectImporter.summarize(xModel);
+    String jSummary = KobjectImporter.summarize(jModel);
+
+    xDig.update(xSummary.getBytes());
+    jDig.update(jSummary.getBytes());
+
+    boolean res;
+    res = MessageDigest.isEqual(jDig.digest(), xDig.digest());
+    System.out.println("Equivalence Result: "+res);
+  }
+
+  @Test
   public void roundTrip() throws Exception {
     InputStream stream = TestUtils.streamFixture("kobject-sample.xml");
-    Model modelXml = KobjectImporter.streamToModel(stream);
+    Model modelXml = KobjectImporter.xmlToModel(stream);
 
     ByteArrayOutputStream outs = new ByteArrayOutputStream();
     RDFDataMgr.write(outs, modelXml, RDFFormat.JSONLD_PRETTY);
@@ -83,6 +107,6 @@ public class KobjectImporterTest {
 
     boolean res;
     res = MessageDigest.isEqual(digJ.digest(), digX.digest());
-    System.out.println("Result: "+res);
+    System.out.println("Round Trip Result: "+res);
   }
 }
