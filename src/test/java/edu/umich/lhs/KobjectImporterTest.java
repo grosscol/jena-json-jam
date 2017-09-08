@@ -1,5 +1,6 @@
 package edu.umich.lhs;
 
+import com.sun.corba.se.impl.presentation.rmi.ExceptionHandlerImpl.ExceptionRW;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -53,7 +54,7 @@ public class KobjectImporterTest {
   }
 
   @Test
-  public void exquivalence() throws Exception{
+  public void xmlJsonEquivalence() throws Exception{
     InputStream stream;
 
     stream = TestUtils.streamFixture("kobject-sample.xml");
@@ -76,6 +77,33 @@ public class KobjectImporterTest {
     boolean res;
     res = MessageDigest.isEqual(jDig.digest(), xDig.digest());
     System.out.println("Equivalence Result: "+res);
+  }
+
+  @Test
+  public void compactEquivalence() throws Exception{
+    InputStream stream;
+
+    stream = TestUtils.streamFixture("kobject-compact.json");
+    Model cModel = KobjectImporter.jsonToModel(stream);
+    stream.close();
+
+    stream = TestUtils.streamFixture("kobject-sample.json");
+    Model jModel = KobjectImporter.jsonToModel(stream);
+    stream.close();
+
+    MessageDigest cDig = MessageDigest.getInstance("MD5");
+    MessageDigest jDig = MessageDigest.getInstance("MD5");
+
+    String cSummary = KobjectImporter.summarize(cModel);
+    String jSummary = KobjectImporter.summarize(jModel);
+
+    cDig.update(cSummary.getBytes());
+    jDig.update(jSummary.getBytes());
+
+    boolean res;
+    res = MessageDigest.isEqual(jDig.digest(), cDig.digest());
+    System.out.println("Equivalence Result: "+res);
+
   }
 
   @Test
